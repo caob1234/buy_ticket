@@ -13,6 +13,8 @@
     "iconv-lite": "^0.4.15",
     "request": "^2.88.0",
     "fs": "^0.0.1-security",
-    "request-promise": "^4.2.4"
+    "request-promise": "^4.2.4",
+    "child_process": "^1.0.2",
+    "os": "^0.1.1"
   }
 }
