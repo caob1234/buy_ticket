@@ -11,6 +11,8 @@
   "dependencies": {
     "alidayu-node": "^1.0.3",
     "iconv-lite": "^0.4.15",
-    "request": "^2.79.0"
+    "request": "^2.88.0",
+    "fs": "^0.0.1-security",
+    "request-promise": "^4.2.4"
   }
 }

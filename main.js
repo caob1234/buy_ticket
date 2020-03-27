@@ -1,32 +1,33 @@
-var request = require('request');
-var iconv = require('iconv-lite');
-var fs = require('fs');
-var from = 10;
-var end = 16;
+"use strict"
+const request = require('request');
+const iconv = require('iconv-lite');
+const fs = require('fs');
+const from = 10;
+const end = 16;
 
-var App = require('alidayu-node');
-var app = new App('App Key', 'App Secret');
+const App = require('alidayu-node');
+const app = new App('App Key', 'App Secret');
 
-var url = 'http://trains.ctrip.com/TrainBooking/Ajax/SearchListHandler.ashx?Action=getSearchList';
-var postData = {
+const url = 'https://trains.ctrip.com/TrainBooking/Ajax/SearchListHandler.ashx?Action=getSearchList';
+const postData = {
     "IsBus": false,
     "Filter": "0",
     "Catalog": "",
     "IsGaoTie": false,
     "IsDongChe": false,
     "CatalogName": "",
-    "DepartureCity": "chengdu",
-    "ArrivalCity": "yingshan2",
+    "DepartureCity": "wuxixinqu",
+    "ArrivalCity": "dingxi",
     "HubCity": "",
-    "DepartureCityName": "成都",
-    "ArrivalCityName": "营山",
-    "DepartureDate": "2017-01-24",
-    "DepartureDateReturn": "2017-01-26",
+    "DepartureCityName": "无锡新区",
+    "ArrivalCityName": "定西",
+    "DepartureDate": "2020-04-01",
+    "DepartureDateReturn": "2020-04-05",
     "ArrivalDate": "",
     "TrainNumber": ""
 };
 
-var options = {
+const options = {
     encoding: null,
     method: 'POST',
     url: url,
@@ -40,27 +41,31 @@ var options = {
 
 function main() {
     console.log('Search From:', new Date().toString() + '\n');
-    fs.appendFile('log.txt', new Date().toString() + '\n');
+    fs.appendFile('log.txt', new Date().toString() + '\n','',(openErr)=>{
+        console.log(openErr)
+    });
     request.post(options, callback);
     setInterval(function() {
         console.log('Search From:', new Date().toString() + '\n');
-        fs.appendFile('log.txt', new Date().toString() + '\n');
+        // fs.appendFile('log.txt', new Date().toString() + '\n');
         request.post(options, callback);
     }, 30000);
 }
 
 function callback(error, response, body) {
     console.log('\n');
-    var list = JSON.parse(iconv.decode(body, "gb2312")).TrainItemsList;
-    var newList = parseList(list);
-    showList(newList);
+    // console.log(body);
+    // console.log(iconv.decode(body, "gb2312"))
+    let list = JSON.parse(iconv.decode(body, "gb2312")).TrainItemsList;
+    let newList = parseList(list);
+    showList(list);
 }
 
 function parseList(list) {
-    var newList = [];
-    for (var i = 0; i < list.length; i++) {
-        var start = Number(list[i].StratTime.split(':')[0]);
-        var Inventory = list[i].SeatBookingItem[0].Inventory;
+    let newList = [];
+    for (let i = 0; i < list.length; i++) {
+        let start = Number(list[i].StratTime.split(':')[0]);
+        let Inventory = list[i].SeatBookingItem[0].Inventory;
         if (start > from && start < end && Inventory === 0) {
             newList.push(list[i]);
         }
@@ -71,33 +76,33 @@ function parseList(list) {
 function showList(list) {
     if (list.length === 0) {
         console.log('No data found\n');
-        fs.appendFile('log.txt', 'No data found\n');
+        // fs.appendFile('log.txt', 'No data found\n');
     } else {
         sendSMS(list);
-        for (var i = 0; i < list.length; i++) {
-            var TrainName = list[i].TrainName;
-            var StartStationName = list[i].StartStationName;
-            var EndStationName = list[i].EndStationName;
-            var StratTime = list[i].StratTime;
-            var EndTime = list[i].EndTime;
-            var Inventory = list[i].SeatBookingItem[0].Inventory;
-            var str = '车次：' + TrainName + ' 开始：' + StartStationName + ' 到达：' + EndStationName + ' 发出时间：' + StratTime + ' 到达时间：' + EndTime + ' 余票：' + Inventory + '\n';
-            console.log(str);
-            fs.appendFile('log.txt', str);
+        for (let i = 0; i < list.length; i++) {
+            let TrainName = list[i].TrainName;
+            let StartStationName = list[i].StartStationName;
+            let EndStationName = list[i].EndStationName;
+            let StratTime = list[i].StratTime;
+            let EndTime = list[i].EndTime;
+            let Inventory = list[i].SeatBookingItem[0].Inventory;
+            let str = '车次：' + TrainName + ' 开始：' + StartStationName + ' 到达：' + EndStationName + ' 出发时间：' + StratTime + ' 到达时间：' + EndTime + ' 余票：' + Inventory + '\n';
+            console.log("得到的信息============== "+str);
+            // fs.appendFile('log.txt', str);
         }
     }
 }
 
 function sendSMS(list) {
-    var trainNames = list[0].TrainName;
-    var numbers = list[0].SeatBookingItem[0].Inventory;
-    var message = JSON.stringify({
+    let trainNames = list[0].TrainName;
+    let numbers = list[0].SeatBookingItem[0].Inventory;
+    let message = JSON.stringify({
         "name": "lrh",
         "trainName": trainNames,
         "number": numbers
     });
 
-    var smsOptions = {
+    let smsOptions = {
         sms_free_sign_name: '提示信息',
         sms_param: message,
         rec_num: '81193903',
