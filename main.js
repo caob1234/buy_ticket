@@ -1,4 +1,5 @@
 "use strict"
+const process=require('process');
 const request = require('request');
 const iconv = require('iconv-lite');
 const fs = require('fs');
@@ -21,8 +22,8 @@ const postData = {
     "HubCity": "",
     "DepartureCityName": "无锡新区",
     "ArrivalCityName": "定西",
-    "DepartureDate": "2020-04-01",
-    "DepartureDateReturn": "2020-04-05",
+    "DepartureDate": "2020-04-03",
+    "DepartureDateReturn": "2020-04-09",
     "ArrivalDate": "",
     "TrainNumber": ""
 };
@@ -38,28 +39,32 @@ const options = {
         'Content-Type': 'application/x-www-form-urlencoded:charset=gb2312',
     }
 };
-
-function main() {
-    console.log('Search From:', new Date().toString() + '\n');
-    fs.appendFile('log.txt', new Date().toString() + '\n','',(openErr)=>{
-        console.log(openErr)
-    });
-    request.post(options, callback);
-    setInterval(function() {
-        console.log('Search From:', new Date().toString() + '\n');
-        // fs.appendFile('log.txt', new Date().toString() + '\n');
-        request.post(options, callback);
+const crawl = () => {
+    return new Promise((resolve, reject) => {
+        request.post(options, (error, response, body) => {
+            if (response.statusCode === 200) {
+                resolve(body);
+            } else {
+                reject(new Error(response.statusCode))
+            }
+        });
+    })
+};
+function main(){
+    setInterval(function () {
+        console.log('setInterval-Search From:', new Date().toString() + '\n');
+        fs.appendFile('log.txt', new Date().toString() + '\n', '', (openErr) => {
+            if (openErr != null) console.log(openErr);
+        });
+        crawl()
+            .then((body) => {
+                let list = JSON.parse(iconv.decode(body, "gb2312")).TrainItemsList;
+                showList(list);
+            })
+            .catch(error => console.error(error));
     }, 30000);
 }
 
-function callback(error, response, body) {
-    console.log('\n');
-    // console.log(body);
-    // console.log(iconv.decode(body, "gb2312"))
-    let list = JSON.parse(iconv.decode(body, "gb2312")).TrainItemsList;
-    let newList = parseList(list);
-    showList(list);
-}
 
 function parseList(list) {
     let newList = [];
@@ -76,7 +81,9 @@ function parseList(list) {
 function showList(list) {
     if (list.length === 0) {
         console.log('No data found\n');
-        // fs.appendFile('log.txt', 'No data found\n');
+        fs.appendFile('log.txt', 'No data found\n', '', (openError) => {
+            if (openError != null) console.log(openError);
+        });
     } else {
         sendSMS(list);
         for (let i = 0; i < list.length; i++) {
@@ -87,7 +94,7 @@ function showList(list) {
             let EndTime = list[i].EndTime;
             let Inventory = list[i].SeatBookingItem[0].Inventory;
             let str = '车次：' + TrainName + ' 开始：' + StartStationName + ' 到达：' + EndStationName + ' 出发时间：' + StratTime + ' 到达时间：' + EndTime + ' 余票：' + Inventory + '\n';
-            console.log("得到的信息============== "+str);
+            console.log("得到的信息============== " + str);
             // fs.appendFile('log.txt', str);
         }
     }

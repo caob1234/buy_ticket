@@ -15,6 +15,7 @@
     "fs": "^0.0.1-security",
     "request-promise": "^4.2.4",
     "child_process": "^1.0.2",
-    "os": "^0.1.1"
+    "os": "^0.1.1",
+    "process": "^0.11.10"
   }
 }
