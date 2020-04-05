@@ -22,7 +22,7 @@ const postData = {
     "HubCity": "",
     "DepartureCityName": "无锡新区",
     "ArrivalCityName": "定西",
-    "DepartureDate": "2020-04-03",
+    "DepartureDate": "2020-04-05",
     "DepartureDateReturn": "2020-04-09",
     "ArrivalDate": "",
     "TrainNumber": ""
