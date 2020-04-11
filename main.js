@@ -58,11 +58,11 @@ function main(){
         });
         crawl()
             .then((body) => {
-                let list = JSON.parse(iconv.decode(body, "gb2312")).TrainItemsList;
-                showList(list);
+                let list = JSON.parse(iconv.decode(body, "gb2312"));
+                showList(list.TrainItemsList);
             })
             .catch(error => console.error(error));
-    }, 30000);
+    }, 3000);
 }
 
 
