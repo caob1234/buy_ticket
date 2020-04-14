@@ -22,8 +22,8 @@ const postData = {
     "HubCity": "",
     "DepartureCityName": "无锡新区",
     "ArrivalCityName": "定西",
-    "DepartureDate": "2020-04-05",
-    "DepartureDateReturn": "2020-04-09",
+    "DepartureDate": "2020-04-18",
+    "DepartureDateReturn": "2020-04-29",
     "ArrivalDate": "",
     "TrainNumber": ""
 };
@@ -85,7 +85,7 @@ function showList(list) {
             if (openError != null) console.log(openError);
         });
     } else {
-        sendSMS(list);
+        // sendSMS(list);
         for (let i = 0; i < list.length; i++) {
             let TrainName = list[i].TrainName;
             let StartStationName = list[i].StartStationName;
